@@ -1,0 +1,2 @@
+entry_date,exit_date,direction,asset_traded,entry_price,exit_price,entry_gsr,entry_gsr_pct,entry_z,exit_z,days_held,exit_reason,corr_at_entry,vix_at_entry,gross_pnl_%,net_pnl_%,net_pnl_₹,total_cost_₹,income_tax_₹,cost_%,equity_after
+2026-01-27,2026-02-02,BUY_GOLD,Gold,5079.8999,4673.5079,44.14,0.6,-2.109,-0.509,5,PRICE_STOP,0.753,16.1,-8.0,-8.226,-37014.91,1014.91,0.0,0.2255,462985.09
