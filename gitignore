@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.env
+venv/
+.venv/
+
+# Output files
+trades_log.csv
+gold_silver_results.png
+gold_crude_results.png
+copper_strategy_results.png
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

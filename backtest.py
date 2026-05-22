@@ -80,7 +80,7 @@ class MCXFuturesCosts:
     STAMP_DUTY        = 0.00002   # 0.002% buy side only
     SLIPPAGE_PER_SIDE = 0.0006    # 0.06% (precious metals very liquid)
     SPREAD_RT         = 0.0004    # 0.04% round-trip (tighter than crude)
-    INCOME_TAX        = 0.30      # 30% on profit (F&O business income)
+    INCOME_TAX        = 0.20      # 20% on profit (F&O business income)
 
     @classmethod
     def compute(cls, trade_value: float, gross_pnl: float) -> dict:
@@ -568,7 +568,7 @@ def print_research_paper(df, sig, t_g, t_n, s_g, s_n, args):
         print(f"  MAX_HOLD    ({s['max_hold_n']:>2})  avg : {s['max_hold_avg_%']:>+.3f}%  ← timed out")
 
     pstats(s_g, "GROSS (Before Costs)")
-    pstats(s_n, "NET   (After All Costs + 30% Income Tax)")
+    pstats(s_n, "NET   (After All Costs + 20% Income Tax)")
 
     if s_g.get("n_trades", 0) > 0 and s_n.get("n_trades", 0) > 0:
         drag = s_g["total_return_%"] - s_n["total_return_%"]
@@ -641,7 +641,7 @@ def print_research_paper(df, sig, t_g, t_n, s_g, s_n, args):
       • A new silver supply source is discovered
 
   L5. 30% TAX ON EVERY WINNING TRADE
-      F&O profits taxed as business income at 30%. This is
+      F&O profits taxed as business income at 20%. This is
       the single biggest cost drag. Actual tax depends on
       annual income slab and loss offsets.
 
