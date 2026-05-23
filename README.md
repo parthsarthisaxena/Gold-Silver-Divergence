@@ -145,7 +145,7 @@ Gold–Silver fixes both problems: correlation is 5x stronger, futures costs 3x 
 ## 🙋 Author
 
 **Parth Sarthi Saxena**
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/parthsarthisaxena)
-- GitHub: [github.com/yourusername](https://github.com/parthsarthisaxena)
+- LinkedIn: [linkedin.com/in/parthsarthisaxena](https://linkedin.com/in/parthsarthisaxena)
+- GitHub: [github.com/parthsarthisaxena](https://github.com/parthsarthisaxena)
 
 *⭐ Star the repo if this helped your research!*
