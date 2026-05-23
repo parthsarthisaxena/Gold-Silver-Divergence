@@ -142,15 +142,10 @@ This strategy was built after:
 Gold–Silver fixes both problems: correlation is 5x stronger, futures costs 3x lower.
 
 ---
-
-## 📜 License
-
-MIT
-
 ## 🙋 Author
 
-**Your Name**
-- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- GitHub: [github.com/yourusername](https://github.com/yourusername)
+**Parth Sarthi Saxena**
+- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/parthsarthisaxena)
+- GitHub: [github.com/yourusername](https://github.com/parthsarthisaxena)
 
 *⭐ Star the repo if this helped your research!*
