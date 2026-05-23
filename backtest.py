@@ -67,23 +67,74 @@ plt.rcParams.update({
 # ════════════════════════════════════════════════════════════
 #  1.  MCX FUTURES COST MODEL
 # ════════════════════════════════════════════════════════════
+def compute_progressive_tax(annual_profit_rs: float) -> float:
+    """
+    Indian Income Tax — New Tax Regime (FY 2025-26)
+    F&O profits = business income → taxed at slab rates.
+
+    Slabs (New Regime):
+      Up to ₹4L        :  0%
+      ₹4L  – ₹8L       :  5%
+      ₹8L  – ₹12L      : 10%
+      ₹12L – ₹16L      : 15%
+      ₹16L – ₹20L      : 20%
+      ₹20L – ₹24L      : 25%
+      Above ₹24L       : 30%
+    + 4% Health & Education Cess on total base tax
+
+    NOTE: This assumes F&O trading is your ONLY income.
+    If you have salary/other income, tax will be higher
+    as F&O profit gets added on top of existing income.
+    """
+    if annual_profit_rs <= 0:
+        return 0.0
+
+    SLABS = [
+        (400_000,  0.00),   # 0–4L
+        (400_000,  0.05),   # 4L–8L
+        (400_000,  0.10),   # 8L–12L
+        (400_000,  0.15),   # 12L–16L
+        (400_000,  0.20),   # 16L–20L
+        (400_000,  0.25),   # 20L–24L
+        (float("inf"), 0.30),  # above 24L
+    ]
+    base_tax  = 0.0
+    remaining = annual_profit_rs
+    for slab_size, rate in SLABS:
+        if remaining <= 0:
+            break
+        taxable   = min(remaining, slab_size)
+        base_tax += taxable * rate
+        remaining -= taxable
+
+    cess  = base_tax * 0.04   # 4% Health & Education Cess
+    return round(base_tax + cess, 2)
+
+
 class MCXFuturesCosts:
     """
     MCX Precious Metals Futures (Gold & Silver) — FY 2025-26
-    Similar structure to crude but slightly different exchange charges.
+
+    Fixed charges (per trade):
+      Brokerage, STT, Exchange, GST, SEBI, Stamp, Slippage, Spread
+    These are deducted per trade.
+
+    Income Tax (progressive slab — NEW regime):
+      Accumulated annually and deducted at financial year end.
+      NOT per trade — tax is computed on annual net profit.
     """
     BROKERAGE_PCT     = 0.0002    # 0.02% per side
-    STT_SELL_ONLY     = 0.0001    # 0.01% sell side only (futures)
+    STT_SELL_ONLY     = 0.0001    # 0.01% sell side only
     EXCHANGE_CHARGE   = 0.000026  # MCX: 0.0026% per side
     GST_RATE          = 0.18      # 18% on brokerage + exchange
     SEBI_CHARGE       = 0.000001  # 0.0001% per side
     STAMP_DUTY        = 0.00002   # 0.002% buy side only
-    SLIPPAGE_PER_SIDE = 0.0006    # 0.06% (precious metals very liquid)
-    SPREAD_RT         = 0.0004    # 0.04% round-trip (tighter than crude)
-    INCOME_TAX        = 0.30      # 30% on profit (F&O business income)
+    SLIPPAGE_PER_SIDE = 0.0006    # 0.06% per side
+    SPREAD_RT         = 0.0004    # 0.04% round-trip
 
     @classmethod
-    def compute(cls, trade_value: float, gross_pnl: float) -> dict:
+    def compute_trading_costs(cls, trade_value: float) -> dict:
+        """Per-trade fixed costs only — NO tax here."""
         brokerage = trade_value * cls.BROKERAGE_PCT * 2
         stt       = trade_value * cls.STT_SELL_ONLY
         exch      = trade_value * cls.EXCHANGE_CHARGE * 2
@@ -92,10 +143,7 @@ class MCXFuturesCosts:
         stamp     = trade_value * cls.STAMP_DUTY
         slippage  = trade_value * cls.SLIPPAGE_PER_SIDE * 2
         spread    = trade_value * cls.SPREAD_RT
-        pre_tax   = brokerage+stt+exch+gst+sebi+stamp+slippage+spread
-        pnl_after = gross_pnl - pre_tax
-        tax       = max(0.0, pnl_after * cls.INCOME_TAX)
-        total     = pre_tax + tax
+        total     = brokerage+stt+exch+gst+sebi+stamp+slippage+spread
         return {
             "brokerage"    : round(brokerage, 2),
             "stt"          : round(stt, 2),
@@ -105,11 +153,41 @@ class MCXFuturesCosts:
             "stamp_duty"   : round(stamp, 2),
             "slippage"     : round(slippage, 2),
             "spread"       : round(spread, 2),
-            "total_pre_tax": round(pre_tax, 2),
+            "total_cost"   : round(total, 2),
+            "cost_pct"     : round(total / trade_value * 100, 4),
+        }
+
+    @classmethod
+    def compute(cls, trade_value: float, gross_pnl: float,
+                annual_profit_so_far: float = 0.0) -> dict:
+        """
+        Full cost computation.
+        Trading costs deducted per trade.
+        Tax estimated using marginal slab on this trade's profit,
+        given profit already accumulated this financial year.
+        """
+        tc        = cls.compute_trading_costs(trade_value)
+        pre_tax   = tc["total_cost"]
+        pnl_after = gross_pnl - pre_tax
+
+        # Marginal tax: tax on (annual_so_far + this_pnl) minus tax on (annual_so_far)
+        if pnl_after > 0:
+            tax_with    = compute_progressive_tax(annual_profit_so_far + pnl_after)
+            tax_without = compute_progressive_tax(annual_profit_so_far)
+            tax         = max(0.0, tax_with - tax_without)
+        else:
+            tax = 0.0
+
+        total  = pre_tax + tax
+        net    = gross_pnl - total
+
+        return {
+            **tc,
             "income_tax"   : round(tax, 2),
             "total_cost"   : round(total, 2),
-            "net_pnl_₹"    : round(gross_pnl - total, 2),
+            "net_pnl_₹"    : round(net, 2),
             "cost_pct"     : round(total / trade_value * 100, 4),
+            "effective_tax_rate": round(tax / pnl_after * 100, 2) if pnl_after > 0 else 0,
         }
 
 
@@ -216,8 +294,8 @@ def build_signals(df: pd.DataFrame, window: int = 60,
 #  4.  BACKTEST ENGINE
 # ════════════════════════════════════════════════════════════
 def run_backtest(df: pd.DataFrame,
-                 window: int   = 60,
-                 z_entry: float = 2.0,
+                 window: int    = 60,
+                 z_entry: float = 1.5,
                  z_exit: float  = 0.3,
                  price_stop: float = 8.0,
                  max_hold: int  = 20,
@@ -225,107 +303,116 @@ def run_backtest(df: pd.DataFrame,
                  apply_costs: bool = True,
                  silver_only: bool = False,
                  gold_only:   bool = False,
-                 min_corr: float = 0.6,
-                 max_vix:  float = 40.0,
+                 min_corr: float = 0.5,
+                 max_vix:  float = 50.0,
                  trend_ma: int  = 50) -> pd.DataFrame:
 
     sig = build_signals(df, window=window, z_entry=z_entry,
                         z_exit=z_exit, min_corr=min_corr,
                         max_vix=max_vix, trend_ma=trend_ma)
 
-    trades   = []
-    equity   = capital
-    in_trade = False
-    entry_i  = None
+    trades        = []
+    equity        = capital
+    in_trade      = False
+    entry_i       = None
+    annual_profit = 0.0   # running net profit in current Indian FY (Apr-Mar)
+    current_fy    = None
 
     for i in range(window + trend_ma, len(sig) - 1):
         z          = sig["GSR_z"].iloc[i]
         filters_ok = sig["all_ok"].iloc[i]
+        date_i     = sig.index[i]
+
+        # ── Indian Financial Year tracker (Apr 1 – Mar 31) ─
+        fy = date_i.year if date_i.month >= 4 else date_i.year - 1
+        if current_fy is None:
+            current_fy = fy
+        if fy != current_fy:
+            annual_profit = 0.0
+            current_fy    = fy
 
         # ── Entry ──────────────────────────────────────────
         if not in_trade and abs(z) >= z_entry and filters_ok:
+            direction = "BUY_SILVER" if z > 0 else "BUY_GOLD"
+            asset     = "Silver"     if z > 0 else "Gold"
 
-            if z > 0:
-                # GSR high → silver cheap → BUY SILVER
-                direction = "BUY_SILVER"
-                asset     = "Silver"
-            else:
-                # GSR low → gold cheap → BUY GOLD
-                direction = "BUY_GOLD"
-                asset     = "Gold"
+            if silver_only and direction != "BUY_SILVER": continue
+            if gold_only   and direction != "BUY_GOLD":   continue
 
-            if silver_only and direction != "BUY_SILVER":
-                continue
-            if gold_only   and direction != "BUY_GOLD":
-                continue
-
-            entry_px   = sig[asset].iloc[i + 1]
-            entry_date = sig.index[i + 1]
-            entry_z    = z
-            entry_gsr  = sig["GSR"].iloc[i]
-            entry_gsr_pct = sig["GSR_pct"].iloc[i]
-            alloc      = equity * 0.90
-            in_trade   = True
-            entry_i    = i
+            entry_px        = sig[asset].iloc[i + 1]
+            entry_date      = sig.index[i + 1]
+            entry_z         = z
+            entry_gsr       = sig["GSR"].iloc[i]
+            entry_gsr_pct   = sig["GSR_pct"].iloc[i]
+            alloc           = equity * 0.90
+            annual_at_entry = annual_profit
+            in_trade        = True
+            entry_i         = i
             continue
 
         # ── Exit ───────────────────────────────────────────
         if in_trade:
-            days_held  = i - entry_i
-            cur_px     = sig[asset].iloc[i]
-            cur_z      = sig["GSR_z"].iloc[i]
-            price_chg  = (cur_px - entry_px) / entry_px * 100
+            days_held = i - entry_i
+            cur_px    = sig[asset].iloc[i]
+            cur_z     = sig["GSR_z"].iloc[i]
+            price_chg = (cur_px - entry_px) / entry_px * 100
 
-            z_rev     = abs(cur_z) <= z_exit
-            stop_hit  = price_chg <= -price_stop
-            max_hit   = days_held >= max_hold
+            z_rev    = abs(cur_z) <= z_exit
+            stop_hit = price_chg <= -price_stop
+            max_hit  = days_held >= max_hold
 
             if z_rev or stop_hit or max_hit:
-                reason   = ("Z_REVERSION" if z_rev
-                            else "PRICE_STOP" if stop_hit
-                            else "MAX_HOLD")
-                exit_px  = (entry_px * (1 - price_stop/100)
-                            if stop_hit else cur_px)
+                reason    = ("Z_REVERSION" if z_rev
+                             else "PRICE_STOP" if stop_hit
+                             else "MAX_HOLD")
+                exit_px   = (entry_px*(1-price_stop/100) if stop_hit else cur_px)
                 exit_date = sig.index[i]
 
                 gross_pct = (exit_px - entry_px) / entry_px * 100
                 gross_rs  = alloc * gross_pct / 100
 
                 if apply_costs:
-                    c = MCXFuturesCosts.compute(alloc, gross_rs)
-                    net_rs = c["net_pnl_₹"]
-                    cost_p = c["cost_pct"]
-                    tax_rs = c["income_tax"]
-                    tot_c  = c["total_cost"]
+                    c = MCXFuturesCosts.compute(
+                        alloc, gross_rs,
+                        annual_profit_so_far=annual_at_entry
+                    )
+                    net_rs  = c["net_pnl_₹"]
+                    cost_p  = c["cost_pct"]
+                    tax_rs  = c["income_tax"]
+                    tot_c   = c["total_cost"]
+                    eff_tax = c.get("effective_tax_rate", 0)
                 else:
-                    net_rs = gross_rs
-                    cost_p = tax_rs = tot_c = 0.0
+                    net_rs = gross_rs; cost_p = tax_rs = tot_c = eff_tax = 0.0
 
-                net_pct = net_rs / alloc * 100
-                equity += net_rs
+                net_pct        = net_rs / alloc * 100
+                equity        += net_rs
+                # Accumulate pre-tax profit for progressive tax tracking
+                pre_tax_costs  = tot_c - tax_rs
+                annual_profit += max(0.0, gross_rs - pre_tax_costs)
 
                 trades.append({
-                    "entry_date"    : entry_date.date(),
-                    "exit_date"     : exit_date.date(),
-                    "direction"     : direction,
-                    "asset_traded"  : asset,
-                    "entry_price"   : round(entry_px, 4),
-                    "exit_price"    : round(exit_px, 4),
-                    "entry_gsr"     : round(entry_gsr, 2),
-                    "entry_gsr_pct" : round(entry_gsr_pct, 1),
-                    "entry_z"       : round(entry_z, 3),
-                    "exit_z"        : round(cur_z, 3),
-                    "days_held"     : days_held,
-                    "exit_reason"   : reason,
-                    "corr_at_entry" : round(sig["roll_corr"].iloc[entry_i], 3),
-                    "vix_at_entry"  : round(sig["VIX"].iloc[entry_i], 1),
-                    "gross_pnl_%"   : round(gross_pct, 3),
-                    "net_pnl_%"     : round(net_pct, 3),
-                    "net_pnl_₹"     : round(net_rs, 2),
-                    "total_cost_₹"  : round(tot_c, 2),
-                    "income_tax_₹"  : round(tax_rs, 2),
-                    "cost_%"        : round(cost_p, 4),
-                    "equity_after"  : round(equity, 2),
+                    "entry_date"      : entry_date.date(),
+                    "exit_date"       : exit_date.date(),
+                    "direction"       : direction,
+                    "asset_traded"    : asset,
+                    "entry_price"     : round(entry_px, 4),
+                    "exit_price"      : round(exit_px, 4),
+                    "entry_gsr"       : round(entry_gsr, 2),
+                    "entry_gsr_pct"   : round(entry_gsr_pct, 1),
+                    "entry_z"         : round(entry_z, 3),
+                    "exit_z"          : round(cur_z, 3),
+                    "days_held"       : days_held,
+                    "exit_reason"     : reason,
+                    "corr_at_entry"   : round(sig["roll_corr"].iloc[entry_i], 3),
+                    "vix_at_entry"    : round(sig["VIX"].iloc[entry_i], 1),
+                    "gross_pnl_%"     : round(gross_pct, 3),
+                    "net_pnl_%"       : round(net_pct, 3),
+                    "net_pnl_₹"       : round(net_rs, 2),
+                    "total_cost_₹"    : round(tot_c, 2),
+                    "income_tax_₹"    : round(tax_rs, 2),
+                    "effective_tax_%"  : round(eff_tax, 2),
+                    "cost_%"          : round(cost_p, 4),
+                    "equity_after"    : round(equity, 2),
                 })
                 in_trade = False
                 entry_i  = None
