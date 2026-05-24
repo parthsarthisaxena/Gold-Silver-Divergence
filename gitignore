@@ -5,11 +5,16 @@ __pycache__/
 venv/
 .venv/
 
-# Output files
+# Output files — do NOT commit these
 trades_log.csv
+pairs_trades_log.csv
+kelly_best_trades.csv
 gold_silver_results.png
-gold_crude_results.png
-copper_strategy_results.png
+oos_validation.png
+pairs_trade_results.png
+kelly_comparison.png
+*.png
+*.csv
 
 # IDE
 .vscode/
