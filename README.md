@@ -123,8 +123,6 @@ F&O profits are business income, taxed at **slab rates** — NOT flat 30%:
 
 Tax is tracked **annually** (April–March Indian FY) and applied on a marginal basis per trade. Effective rate for most traders: **7–15%**, not 30%.
 
----
-
 ## ✅ Out-of-Sample Validation
 
 Parameters were fixed and tested on three independent time windows:
@@ -142,8 +140,6 @@ Additional checks:
 - ✅ Lag-1 autocorrelation: -0.07 (no inflation of Sharpe)
 - ✅ Look-ahead bias: absent (entry on next-day close)
 - ✅ p-value vs random baseline: 0.011 (statistically significant)
-
----
 
 ## 🔬 What Was Also Tested (and Why It Was Rejected)
 
@@ -168,8 +164,6 @@ Kelly reduces drawdown significantly but also reduces absolute return. Sharpe is
 - ₹50L+: Dynamic Kelly (drawdown management matters at scale)
 - Fund management: Half Kelly (industry standard)
 
----
-
 ## 📁 Repository Structure
 
 ```
@@ -184,9 +178,6 @@ gold_silver_strategy/
 ├── README.md
 └── .gitignore
 ```
-
----
-
 ## 🚀 Quickstart
 
 ```bash
@@ -205,9 +196,6 @@ python kelly_sizing.py --period 10y
 # Run pairs trade analysis
 python pairs_trade.py --period 10y
 ```
-
----
-
 ## ⚙️ Parameters (backtest.py)
 
 | Argument | Default | Description |
@@ -224,8 +212,6 @@ python pairs_trade.py --period 10y
 | `--gold-only` | off | Only BUY_GOLD signals |
 | `--capital` | `500000` | Starting capital in ₹ |
 
----
-
 ## ⚠️ Limitations
 
 | # | Limitation | Impact |
@@ -238,8 +224,6 @@ python pairs_trade.py --period 10y
 | L6 | MCX lot sizes: Gold=1kg (~₹8L), Silver=30kg (~₹2.5L) | ₹5L capital may only support 1 lot |
 | L7 | Roll costs not modelled for holds near contract expiry | Add ~0.1–0.2% for month-end rolls |
 
----
-
 ## 🔭 Future Improvements
 
 - [ ] Convert COMEX to INR using live USD/INR rate before computing GSR
@@ -249,25 +233,6 @@ python pairs_trade.py --period 10y
 - [ ] Test on Gold–Platinum and Silver–Platinum pairs
 - [ ] Trailing stop instead of fixed 8% stop
 
----
-
-## 📜 License
-
-MIT — free to use, modify, and distribute. Attribution appreciated.
-
----
-
-## 👤 Author
-
-**Parth**
-- 🔗 LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
-- 🐙 GitHub: [github.com/yourusername](https://github.com/yourusername)
-
-<<<<<<< HEAD
-*If this research helped you, please ⭐ the repo!*
-=======
----
-
 ## 🔬 Lessons From Failed Strategies
 
 This strategy was built after:
@@ -276,7 +241,6 @@ This strategy was built after:
 
 Gold–Silver fixes both problems: correlation is 5x stronger, futures costs 3x lower.
 
----
 ## 🙋 Author
 
 **Parth Sarthi Saxena**
@@ -284,4 +248,3 @@ Gold–Silver fixes both problems: correlation is 5x stronger, futures costs 3x 
 - GitHub: [github.com/parthsarthisaxena](https://github.com/parthsarthisaxena)
 
 *⭐ Star the repo if this helped your research!*
->>>>>>> d4a21eb297e0b0fde16d516b9775c1b20185de86
