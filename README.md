@@ -263,4 +263,25 @@ MIT — free to use, modify, and distribute. Attribution appreciated.
 - 🔗 LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
 - 🐙 GitHub: [github.com/yourusername](https://github.com/yourusername)
 
+<<<<<<< HEAD
 *If this research helped you, please ⭐ the repo!*
+=======
+---
+
+## 🔬 Lessons From Failed Strategies
+
+This strategy was built after:
+1. **Copper → HINDCOPPER** failed: NSE equity costs (1.3%/trade) too high
+2. **Gold–Crude divergence** failed: correlation too weak (r=0.25), 2020 wiped account
+
+Gold–Silver fixes both problems: correlation is 5x stronger, futures costs 3x lower.
+
+---
+## 🙋 Author
+
+**Parth Sarthi Saxena**
+- LinkedIn: [linkedin.com/in/parthsarthisaxena](https://linkedin.com/in/parthsarthisaxena)
+- GitHub: [github.com/parthsarthisaxena](https://github.com/parthsarthisaxena)
+
+*⭐ Star the repo if this helped your research!*
+>>>>>>> d4a21eb297e0b0fde16d516b9775c1b20185de86
