@@ -1,28 +1,28 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
-║  PAIRS TRADE: Long Silver + Short Gold Simultaneously           ║
-║  Gold–Silver GSR Strategy — Market-Neutral Version              ║
+║  PAIRS TRADE: Long Silver + Short Gold Simultaneously            ║
+║  Gold–Silver GSR Strategy — Market-Neutral Version               ║
 ╠══════════════════════════════════════════════════════════════════╣
-║  HOW IT WORKS:                                                  ║
+║  HOW IT WORKS:                                                   ║
 ║                                                                  ║
-║  Single-leg (old):                                              ║
-║    GSR high → BUY SILVER only                                   ║
-║    Risk: if both gold & silver crash together, you lose         ║
+║  Single-leg (old):                                               ║
+║    GSR high → BUY SILVER only                                    ║
+║    Risk: if both gold & silver crash together, you lose          ║
 ║                                                                  ║
-║  Pairs trade (new):                                             ║
-║    GSR high → BUY SILVER + SHORT GOLD (equal notional)         ║
-║    GSR low  → BUY GOLD   + SHORT SILVER (equal notional)       ║
-║    Risk: only exposed to SPREAD movement, not direction         ║
+║  Pairs trade (new):                                              ║
+║    GSR high → BUY SILVER + SHORT GOLD (equal notional)           ║
+║    GSR low  → BUY GOLD   + SHORT SILVER (equal notional)         ║
+║    Risk: only exposed to SPREAD movement, not direction          ║
 ║                                                                  ║
 ║  Example:                                                        ║
-║    Gold +5%, Silver +8% → P&L = +8% - 5% = +3% on spread      ║
-║    Gold -5%, Silver -2% → P&L = -2% - (-5%) = +3% on spread   ║
-║    Both crash 20% → P&L = -20% - (-20%) = 0% (protected!)     ║
+║    Gold +5%, Silver +8% → P&L = +8% - 5% = +3% on spread         ║
+║    Gold -5%, Silver -2% → P&L = -2% - (-5%) = +3% on spread      ║ 
+║    Both crash 20% → P&L = -20% - (-20%) = 0% (protected!)        ║
 ║                                                                  ║
-║  MCX FUTURES SHORTING:                                          ║
-║    Selling MCX Gold/Silver futures = short position             ║
-║    Perfectly legal, standard practice                           ║
-║    Margin required: ~10% of notional per leg                    ║
+║  MCX FUTURES SHORTING:                                           ║
+║    Selling MCX Gold/Silver futures = short position              ║
+║    Perfectly legal, standard practice                            ║
+║    Margin required: ~10% of notional per leg                     ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Usage:
